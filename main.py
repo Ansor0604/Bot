@@ -1,19 +1,34 @@
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
-from handlers import handle_message
+import threading
+from flask import Flask
+from telegram import Bot
+from telegram.ext import Updater, CommandHandler
 
+TOKEN = "7752581705:AAGMWx2IkpqCb13pKxiJ2pXdi9OS-VWqTE0"  # <-- O'z tokeningizni yozing
+
+# Telegram Bot funksiyasi
 def start(update, context):
-    user = update.effective_user
-    update.message.reply_text(f"Salom, {user.first_name}! Assalomu alaykum! Men suhbat botiman 😊")
+    update.message.reply_text("Bot ishlayapti!")
 
-def main():
-    updater = Updater("7752581705:AAGMWx2IkpqCb13pKxiJ2pXdi9OS-VWqTE0", use_context=True)
+# Flask serveri - Render Web Service uchun
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return "Bot is running!"
+
+# Flaskni alohida ipda ishga tushirish
+def run_flask():
+    app.run(host="0.0.0.0", port=8080)
+
+# Botni ishga tushirish
+def run_bot():
+    updater = Updater(TOKEN, use_context=True)
     dp = updater.dispatcher
-
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
-
     updater.start_polling()
     updater.idle()
 
+# Har ikkala xizmatni parallel ishga tushiramiz
 if __name__ == "__main__":
-    main()
+    threading.Thread(target=run_flask).start()
+    run_bot()
